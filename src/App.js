@@ -1,24 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import UploadReceipt from "./components/UploadReceipt";
+import ValidateReceipt from "./components/ValidateReceipt";
+import ProcessReceipt from "./components/ProcessReceipt";
+import ReceiptTable from "./components/ReceiptTable";
+import axios from "axios";
+import { Container, Typography, Box, Paper } from "@mui/material";
 
 function App() {
+  const [fileId, setFileId] = useState(null);
+  const [receipts, setReceipts] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/receipts")
+      .then((res) => setReceipts(res.data))
+      .catch((err) => console.error("Error fetching receipts:", err));
+  }, [fileId]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container maxWidth="lg">
+      <Paper elevation={3} className="p-6 my-6 rounded-lg shadow-md bg-white">
+        <Typography variant="h4" align="center" gutterBottom>
+          📄 Receipt Processing System
+        </Typography>
+
+        <UploadReceipt onUploadSuccess={setFileId} />
+
+        {fileId && (
+          <Box className="flex justify-center space-x-4 my-4">
+            <ValidateReceipt fileId={fileId} />
+            <ProcessReceipt fileId={fileId} />
+          </Box>
+        )}
+
+        <ReceiptTable receipts={receipts} />
+      </Paper>
+    </Container>
   );
 }
 
